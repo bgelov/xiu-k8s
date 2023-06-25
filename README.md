@@ -81,25 +81,78 @@ metadata:
 
 
 # Деплой в облачный kubernetes
+Для тестирования развернё приложение в Managed Service for Kubernetes от Yandex Cloud.
 
+Проверяем, что мы подключены к нужному контексту.
+```
+kubectl config current-context
+```
+
+Подключаюсь к кластеру, перехожу в каталог с yaml файлами и выполняю последовательно apply:
+```
+kubectl apply -f xiu-namespace.yaml
+
+# сразу переключаюсь на новый неймспейс
+kubectl config set-context --current --namespace=xiu-prod-namespace
+
+kubectl apply -f xiu-configmap.yaml
+kubectl apply -f xiu-deployment.yaml
+kubectl apply -f xiu-service.yaml
+kubectl apply -f xiu-ingress.yaml
+```
+
+
+
+kubectl get cm --namespace xiu-prod-namespace
 
 
 ## Работа масштабирования
 
 Изначально в делплое у нас установлен `replicas: 1`, т.е. развернётся только один под. Проверяем командой
 ```
-kubectl get pods --namespace xiu-prod-namespace
+kubectl get pods
+
+NAME                                   READY   STATUS    RESTARTS   AGE
+xiu-prod-deployment-79c786c57d-znkqg   1/1     Running   0          27m
 ```
 
 Для увеличения до 3 подов выполняем команду:
 ```
-kubectl scale deployment xiu-prod-deployment --replicas=3 --namespace xiu-prod-namespace
+kubectl scale deployment xiu-prod-deployment --replicas=3
+
+NAME                                   READY   STATUS    RESTARTS   AGE
+xiu-prod-deployment-79c786c57d-54495   1/1     Running   0          5s
+xiu-prod-deployment-79c786c57d-m8vhs   1/1     Running   0          5s
+xiu-prod-deployment-79c786c57d-znkqg   1/1     Running   0          28m
 ```
 
 Чтобы уменьшить количество подов до 2, вводим команду 
 ```
-kubectl scale deployment xiu-prod-deployment --replicas=2 --namespace xiu-prod-namespace
+kubectl scale deployment xiu-prod-deployment --replicas=2
+
+NAME                                   READY   STATUS        RESTARTS   AGE
+xiu-prod-deployment-79c786c57d-54495   1/1     Running       0          57s
+xiu-prod-deployment-79c786c57d-m8vhs   1/1     Terminating   0          57s
+xiu-prod-deployment-79c786c57d-znkqg   1/1     Running       0          29m
 ```
+
+И в итоге у нас остаётся только 2 пода
+```
+NAME                                   READY   STATUS    RESTARTS   AGE
+xiu-prod-deployment-79c786c57d-54495   1/1     Running   0          96s
+xiu-prod-deployment-79c786c57d-znkqg   1/1     Running   0          30m
+```
+
+
+
+## HPA
+Теперь попробуем реализовать автомасштабирование, Horizontal Pod Autoscaler. Если у нас будет замечена нагрузка CPU больше заданной, то у нас автоматически увеличится количество подов.
+```
+kubectl apply -f xiu-namespace.yaml
+```
+
+
+, памяти или количество соединений.
 
 
 
@@ -107,8 +160,6 @@ kubectl scale deployment xiu-prod-deployment --replicas=2 --namespace xiu-prod-n
 
 
 
-# HPA (Horizontal Pod Autoscaler)
-Попробуем настроить автоматическое масштабирование подов, если у нас будет замечена большая нагрузка CPU, памяти или количество соединений.
 
 
 # SSL для HLS и HTTPFLV
@@ -117,10 +168,11 @@ kubectl scale deployment xiu-prod-deployment --replicas=2 --namespace xiu-prod-n
 https://cert-manager.io/docs/installation/
 
 
-# Liveness/Readiness Probes
-
-- 
-
-Создадим проверку жизнеспособности и готовности подов, чтобы k8s мог мониторить их состояние и выполнял какие-либо действия при проблемах.
 
 
+# Упаковка решения
+
+```
+ARCHIVE_NAME="belov-stage1-$(date --utc -d "2023-06-21 11:15" +%s)-$(date --utc +%s)"
+tar -cJf "${ARCHIVE_NAME}.tar.xz" xiu-compose xiu-image WRITEUP.md
+```
