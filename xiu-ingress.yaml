@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xiu-prod-ingress
+  namespace: xiu-prod-namespace
+  labels:
+    app: xiu
+    environment: prod
+  annotations:
+    # https://cloud.yandex.ru/docs/managed-kubernetes/tutorials/new-kubernetes-project
+    ingress.alb.yc.io/subnets: xxxxxxxxxxxxxxxxxxxx
+    ingress.alb.yc.io/external-ipv4-address: auto
+    ingress.alb.yc.io/group-name: xiu-prod-ingress
+spec:
+  tls:
+    - hosts:
+        - hls.vestan.ip03.ru
+      secretName: yc-certmgr-cert-id-xxxxxxxxxxxxxxxxxxxx
+    - hosts:
+        - httpflv.vestan.ip03.ru
+      secretName: yc-certmgr-cert-id-xxxxxxxxxxxxxxxxxxxx
+  rules:
+  - host: hls.vestan.ip03.ru
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: xiu-prod-service
+            port:
+              name: hls
+  - host: httpflv.vestan.ip03.ru
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: xiu-prod-service
+            port: 
+              name: httpflv

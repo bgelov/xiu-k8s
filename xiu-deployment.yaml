@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xiu-prod-deployment
+  namespace: xiu-prod-namespace
+  labels:
+    app: xiu
+    environment: prod
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: xiu
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: xiu
+        environment: prod
+    spec:
+      containers:
+      - name: xiu-prod-pod
+        image: bgelov/1687346100-977d03e7f0746077d90baa216bbf61c2:1.0.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 1935
+        - containerPort: 8080
+        - containerPort: 8081
+        # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        volumeMounts:
+        - name: config
+          mountPath: "/etc/xiu"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: xiu-node-configmap
+            items:
+            - key: "config_rtmp.toml"
+              path: "config_rtmp.toml"
