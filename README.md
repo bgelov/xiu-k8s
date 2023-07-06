@@ -172,17 +172,17 @@ metadata:
   annotations:
     # Дополнительные настройки для Application Load Balancer Ingress controller
     # https://cloud.yandex.ru/docs/managed-kubernetes/tutorials/new-kubernetes-project
-    ingress.alb.yc.io/subnets: e9b56musb7icsul9p85c
+    ingress.alb.yc.io/subnets: xxxxxxxxxxxxxxxxxxxx
     ingress.alb.yc.io/external-ipv4-address: auto
     ingress.alb.yc.io/group-name: xiu-prod-ingress
 spec:
   tls:
     - hosts:
         - hls.vestan.ip03.ru
-      secretName: yc-certmgr-cert-id-fpqorulp3e6rigekls4u
+      secretName: yc-certmgr-cert-id-xxxxxxxxxxxxxxxxxxxx
     - hosts:
         - httpflv.vestan.ip03.ru
-      secretName: yc-certmgr-cert-id-fpqs2vrcv3lgnvp0jgqf
+      secretName: yc-certmgr-cert-id-xxxxxxxxxxxxxxxxxxxx
   rules:
   - host: hls.vestan.ip03.ru
     http:
