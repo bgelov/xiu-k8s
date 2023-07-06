@@ -1,29 +1,17 @@
-# Задача 2
-Реализация кластера для разверстки ее в production среде kubernetes.
+# Реализация xiu кластера для развёртывания в production среде kubernetes
 
-Успешным результатом является:
-- Возможность масштабирования кластера и load-balancing rtmp.
-- Написан ingress-конфиг для httpflv и hls ендпоинтов на поддомены.
+Xiu - a simple, high performance and secure live media server in pure Rust (RTMP[cluster]/HTTP-FLV/HLS).
+https://github.com/harlanc/xiu.git
 
-Срок выполнения 3 дня.
-
-Решение предоставить в виде архива petrov-stage2-1685933169-1685933170.tar.xz, где timestamp - время получения и сдачи задания. И предоставить writeup с описанием решения WRITEUP.md в архиве.
-
-## Требования к реализации
-- Продемонстрировать работоспособность масштабирования. Сдеплоить в 1 экземпляре и с помощью scale увеличить значение до 3 и уменьшить до 2.
-- Продемонстрировать работу балансировки нагрузки на rtmp-кластер.
-
-Также, будет плюсом:
+- Масштабирование кластера и load-balancing rtmp.
+- ingress-конфиг для httpflv и hls endpoints на поддомены.
 - HPA
 - SSL для HLS и HTTPFLV
 - liveness/readiness
 
 ---
 
-# Решение
-
-Для реализации решения нам понадобится написать несколько yaml файлов с конфигурациями, которые в дальшейшем развернут сервис и необходимые компоненты в kubernetes.
-
+Для реализации нам понадобится написать несколько yaml файлов с конфигурациями, которые в дальшейшем развернут сервис и необходимые компоненты в kubernetes.
 Мы хотим развернуть сервис в продакшен среде. Для начала создадим отдельный неймспейс xiu-prod-namespace для сервиса.
 
 **xiu-namespace.yaml**
@@ -361,14 +349,4 @@ xiu-prod-deployment-7f57f5f5f6-9458t        0/1     Pending   0          24s
 xiu-prod-deployment-7f57f5f5f6-b74m7        1/1     Running   0          131m
 xiu-prod-deployment-7f57f5f5f6-btp5x        0/1     Pending   0          39s
 xiu-prod-deployment-7f57f5f5f6-gtxhb        0/1     Pending   0          39s
-```
-
-
-
-
-# Упаковка решения
-
-```
-ARCHIVE_NAME="belov-stage2-$(date --utc -d "2023-06-21 11:15" +%s)-$(date --utc +%s)"
-tar -cJf "${ARCHIVE_NAME}.tar.xz" xiu-k8s-yaml WRITEUP.md
 ```
